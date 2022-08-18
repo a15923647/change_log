@@ -6,8 +6,13 @@ class Watcher {
     /*
      * start to monitor file changes
      */
-    virtual void start();
+    virtual void start() = 0;
+    /*
+     * init storage
+     * mkdir
+     */
+    virtual void init() = 0;
   private:
-    virtual bool match(std::string& ) const;
+    virtual bool match(std::string& ) const = 0;
 };
 #endif
