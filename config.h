@@ -18,6 +18,6 @@ class Config {
 namespace config {
   const std::string root_dir("/mnt/nas/data/programming/common");
   const std::string temp_dir("/mnt/nas/data/tmp/test_change_log");
-  const std::string re("(*.(cpp|h|py|js|css|html|go))|[mM]akefile");
+  const std::string re(".*\\.(cpp|h|py|js|css|html|go)|[mM]akefile");
 }
 #endif

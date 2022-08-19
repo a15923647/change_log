@@ -83,9 +83,11 @@ void InotifyWatcher::get_file_path_loop(vector<string> watch_paths) {
       if (event->len) {
         fs::path dir = wd2path[event->wd];
         fs::path filename(event->name);
+        string filename_str(event->name);
         EventType ev_t;
-        
-        if (event->mask & IN_CREATE | IN_DELETE | IN_MODIFY) {
+        if (!match(filename_str)) {
+          cout << filename_str << " not match tracking pattern\n";
+        } else if (event->mask & IN_CREATE | IN_DELETE | IN_MODIFY) {
           string full_path = (dir / filename).u8string();
           cout << "detect " << evt_name[event->mask] << " event on: " << full_path << endl;
           Event new_ev(evt_trans[event->mask], full_path);
