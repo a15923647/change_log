@@ -3,11 +3,13 @@
 #include "file.h"
 #include "encoding.h"
 #include "config.h"
+#include <iostream>
 
 std::vector<Node> record;
 std::map<std::string, std::map<std::string, File>> watch_struct;
 
 void VectorStorage::update(Event ev) {
+  puts("updating...");
   fs::path abspath(fs::path(ev.path));
   /*TODO: add some check(regex) on this spot*/
   std::string dir = abspath.parent_path().u8string();
@@ -24,7 +26,16 @@ void VectorStorage::update(Event ev) {
       return;
   }
 
+  const auto copyOptions = fs::copy_options::update_existing;
   if (ev.ev_type == EventType::MODIFY) {
+    if (!watch_struct.count(dir))
+      watch_struct[dir] = std::map<string, File>();
+    if (!watch_struct[dir].count(filename)) {
+      File not_tracked_f(ev.path, config::root_dir, config::temp_dir, content);
+      watch_struct[dir][filename] = not_tracked_f;
+      fs::copy(not_tracked_f.path, not_tracked_f.temp_path, copyOptions);
+      return;
+    }
     File *f = &(watch_struct[dir][filename]);
     f->processing->lock();
     std::string old_content;
@@ -32,11 +43,16 @@ void VectorStorage::update(Event ev) {
     read_whole_file(temp_path, old_content);
     //lcs
     LCS lcs(old_content, content);
+    string lcs_res;
+    lcs.lcs(lcs_res);
+    std::cout << "old content: " << old_content << std::endl;
+    std::cout << "new content: " << content << std::endl;
+    std::cout << "diff length: " << lcs.op_list.content_length() << std::endl;
     //store to container
     record.push_back(Node(ev, lcs.op_list));
     //update file states
     f->sha256_hexs = sha256(content);
-    fs::copy(f->path, f->temp_path);
+    fs::copy(f->path, f->temp_path, copyOptions);
     f->processing->unlock();
   } else if (ev.ev_type == EventType::CREATE) {
     OperationList op_list;
