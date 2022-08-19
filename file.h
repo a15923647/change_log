@@ -15,14 +15,20 @@
 std::string sha256(const std::string str);
 void read_whole_file(std::string& path, std::string& dest);
 struct File {
+  static fs::path root_dir_sub(std::string path, std::string root_path, std::string temp_dir) {
+    fs::path input_path = fs::path(path);
+    fs::path abs_path = fs::absolute(input_path);
+    return fs::path(temp_dir) / fs::relative(abs_path, fs::path(root_path));
+  }
   fs::path path;
   fs::path temp_path;
   std::string sha256_hexs;
   std::mutex *processing;
   File() {}
   File(std::string path, std::string root_path, std::string temp_dir, std::string content="") {
-    this->path = fs::path(path);
-    this->temp_path = fs::path(temp_dir) / fs::relative(this->path, fs::path(root_path));//concat
+    fs::path input_path = fs::path(path);
+    this->path = fs::absolute(input_path);
+    this->temp_path = File::root_dir_sub(path, root_path, temp_dir);//fs::path(temp_dir) / fs::relative(this->path, fs::path(root_path));//concat
     //std::string content;
     this->processing = new std::mutex();
     if (content.length() == 0)

@@ -1,6 +1,8 @@
 #ifndef WATCHER_INCLUDED
 #define WATCHER_INCLUDED
 #include "event.h"
+#include "storage.h"
+#include <string>
 class Watcher {
   public:
     /*
@@ -12,7 +14,8 @@ class Watcher {
      * mkdir
      */
     virtual void init() = 0;
-  private:
-    virtual bool match(std::string& ) const = 0;
+  //private:
+    //virtual bool match(std::string& filename) const = 0;
+    
 };
 #endif

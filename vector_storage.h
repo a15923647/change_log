@@ -16,12 +16,16 @@ struct Node : Event {
     return trigger_time < o.trigger_time;
   }
 };
+
 class VectorStorage : public Storage {
   public:
-    void update(Event&) override;
-    void *query(std::string& query) override;
-  private:
-    std::vector<Node> record;
-    std::map<std::string, std::map<std::string, File>> watch_struct;
+    static void update(Event);
+    static void *query(std::string& query);
+  //protected:
+    //static std::vector<Node> record;
+    //static std::map<std::string, std::map<std::string, File>> watch_struct;
+    
 };
+extern std::vector<Node> record;
+extern std::map<std::string, std::map<std::string, File>> watch_struct;
 #endif

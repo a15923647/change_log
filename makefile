@@ -1,7 +1,7 @@
 target:=runthis
 PP:=g++
-CPPFLAGS:= -g -lcrypto -std=c++17
-LINKFLAGS:= -lcrypto
+CPPFLAGS:= -g -lcrypto -lpthread -std=c++17
+LINKFLAGS:= -lcrypto -lpthread
 source:=$(shell find . -maxdepth 1 -type f -name "*.cpp")
 objs:=$(patsubst %.cpp, %.o, $(source))
 

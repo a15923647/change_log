@@ -16,7 +16,8 @@ class Config {
     std::string global_regex;
 };
 namespace config {
-  std::string root_dir("/mnt/nas/data/programming");
-  std::string temp_dir("/mnt/nas/data/tmp/");
+  const std::string root_dir("/mnt/nas/data/programming/common");
+  const std::string temp_dir("/mnt/nas/data/tmp/test_change_log");
+  const std::string re("(*.(cpp|h|py|js|css|html|go))|[mM]akefile");
 }
 #endif

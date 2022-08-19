@@ -10,10 +10,10 @@ class Storage {
      * Update the temp file
      * Update hash in File
      */
-    virtual void update(Event&) = 0;
+    static void update(Event&);
     /*
      * Query for something
      */
-    virtual void *query(std::string& query) = 0;
+    static void *query(std::string& query);
 };
 #endif

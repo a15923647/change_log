@@ -3,7 +3,11 @@
 #include "file.h"
 #include "encoding.h"
 #include "config.h"
-void VectorStorage::update(Event& ev) {
+
+std::vector<Node> record;
+std::map<std::string, std::map<std::string, File>> watch_struct;
+
+void VectorStorage::update(Event ev) {
   fs::path abspath(fs::path(ev.path));
   /*TODO: add some check(regex) on this spot*/
   std::string dir = abspath.parent_path().u8string();
@@ -21,19 +25,19 @@ void VectorStorage::update(Event& ev) {
   }
 
   if (ev.ev_type == EventType::MODIFY) {
-    File& f = watch_struct[dir][filename];
-    f.processing->lock();
+    File *f = &(watch_struct[dir][filename]);
+    f->processing->lock();
     std::string old_content;
-    string temp_path(f.temp_path.u8string());
+    string temp_path(f->temp_path.u8string());
     read_whole_file(temp_path, old_content);
     //lcs
     LCS lcs(old_content, content);
     //store to container
     record.push_back(Node(ev, lcs.op_list));
     //update file states
-    f.sha256_hexs = sha256(content);
-    fs::copy(f.path, f.temp_path);
-    f.processing->unlock();
+    f->sha256_hexs = sha256(content);
+    fs::copy(f->path, f->temp_path);
+    f->processing->unlock();
   } else if (ev.ev_type == EventType::CREATE) {
     OperationList op_list;
     if(isdir) {
