@@ -91,8 +91,9 @@ void InotifyWatcher::get_file_path_loop(vector<string> watch_paths) {
           string full_path = (dir / filename).u8string();
           cout << "detect " << evt_name[event->mask] << " event on: " << full_path << endl;
           Event new_ev(evt_trans[event->mask], full_path);
-          //thread(VectorStorage::update, new_ev);
-          VectorStorage::update(new_ev);
+          thread t(VectorStorage::update, new_ev);
+          t.detach();
+          //VectorStorage::update(new_ev);
         }
         
       }

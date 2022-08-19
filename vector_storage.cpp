@@ -11,7 +11,6 @@ std::map<std::string, std::map<std::string, File>> watch_struct;
 void VectorStorage::update(Event ev) {
   puts("updating...");
   fs::path abspath(fs::path(ev.path));
-  /*TODO: add some check(regex) on this spot*/
   std::string dir = abspath.parent_path().u8string();
   std::string filename = abspath.filename().u8string();
   bool isdir = fs::is_directory(abspath);
@@ -48,6 +47,11 @@ void VectorStorage::update(Event ev) {
     std::cout << "old content: " << old_content << std::endl;
     std::cout << "new content: " << content << std::endl;
     std::cout << "diff length: " << lcs.op_list.content_length() << std::endl;
+    if (lcs.op_list.content_length() == 0) {
+      cout << "nothing changed\n";
+      f->processing->unlock();
+      return;
+    }
     //store to container
     record.push_back(Node(ev, lcs.op_list));
     //update file states
