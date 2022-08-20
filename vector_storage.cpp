@@ -93,9 +93,12 @@ void *VectorStorage::query(std::string& query) {
   nu *= 3600;
 
   std::vector<Node> *ret = new vector<Node>();
-  for (auto it = record.end()-1; it >= record.begin(); it--) {
-    if (difftime(time(NULL), it->trigger_time) > nu) break;
-    ret->push_back(*it);
+  int rsize = record.size();
+  std::cout << "record size: " << rsize << std::endl;
+  for (int i = rsize-1; i >= 0; i--) {
+    std::cout << i << "/" << rsize << std::endl;
+    if (difftime(time(NULL), record[i].trigger_time) > nu) break;
+    ret->push_back(record[i]);
   }
   std::reverse(ret->begin(), ret->end());
   return ret;

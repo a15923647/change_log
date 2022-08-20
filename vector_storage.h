@@ -4,6 +4,8 @@
 #include <queue>
 #include <map>
 #include <sstream>
+#include <iostream>
+#include <fstream>
 #include "operation.h"
 #include "storage.h"
 #include "event.h"
@@ -14,6 +16,21 @@ struct Node : Event {
   Node(Event& ev, OperationList& op_list) : Event(ev), op_list(op_list) {}
   const bool operator < (const Node& o) const {
     return trigger_time < o.trigger_time;
+  }
+  friend std::ostream& operator << (std::ostream& output_stream, const Node& node) {
+    output_stream << node.ev_type << " " << node.trigger_time << " " << node.path << std::endl;
+    output_stream << node.op_list << std::endl;
+    return output_stream;
+  }
+  friend std::istream& operator >> (std::istream& input_stream, Node& node) {
+    int ev_num;
+    input_stream >> ev_num >> node.trigger_time;
+    node.ev_type = num2ev_type[ev_num];
+    input_stream.get();//eat " "
+    getline(input_stream, node.path);
+    input_stream.get();//eat "\n"
+    input_stream >> node.op_list;
+    return input_stream;
   }
 };
 

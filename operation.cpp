@@ -70,7 +70,8 @@ auto OperationList::begin() const {return this->ops.begin();}
 auto OperationList::end() const {return this->ops.end();}
 
 std::ostream& operator << (std::ostream& output_stream, const OperationList& o_list) {
-  if (o_list.empty()) return output_stream;
+  output_stream << o_list.size() << std::endl;
+  if (o_list.size() == 0) return output_stream;
   output_stream << *(o_list.end()-1);
   for (auto it = o_list.end()-2; it >= o_list.begin(); it--) {
     output_stream << "---\n" << *it;
@@ -79,13 +80,17 @@ std::ostream& operator << (std::ostream& output_stream, const OperationList& o_l
 }
 
 std::istream& operator >> (std::istream& input_stream, OperationList& o_list) {
+  size_t n;
+  input_stream >> n; input_stream.get();//eat endl
+  if (n == 0) return input_stream;
   std::vector<edit_operation> buf;
   edit_operation tmp;
   if (input_stream.peek() != EOF) {
     input_stream >> tmp;
     buf.push_back(tmp);
   }
-  while (input_stream.peek() != EOF) {
+  
+  while (--n && input_stream.peek() != EOF) {
     for (int i = 0; i < 4; i++) input_stream.get();
     input_stream >> tmp;
     buf.push_back(tmp);

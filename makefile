@@ -1,4 +1,4 @@
-target:=runthis
+target:=runrun
 PP:=g++
 CPPFLAGS:= -g -lcrypto -lpthread -std=c++17
 LINKFLAGS:= -lcrypto -lpthread
@@ -11,7 +11,7 @@ DEPFLAGS = -MMD -MF $(@:.o=.d)
 
 all: $(target)
 
-runthis: $(objs)
+runrun: $(objs)
 	$(PP) -o $@ $^ $(LINKFLAGS)
 
 %.o: %.cpp
