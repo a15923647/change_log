@@ -60,15 +60,17 @@ void InotifyWatcher::get_file_path_loop(vector<string> watch_paths) {
   }
 
   for (string path : watch_paths) {
-    wd2path[inotify_add_watch(fd, path.c_str(), IN_MODIFY | IN_CREATE | IN_DELETE)] = fs::path(path);
+    wd2path[inotify_add_watch(fd, path.c_str(), IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVED_TO)] = fs::path(path);
   }
   unordered_map<int, EventType> evt_trans;
   evt_trans[IN_MODIFY] = EventType::MODIFY;
+  evt_trans[IN_MOVED_TO] = EventType::MODIFY;
   evt_trans[IN_CREATE] = EventType::CREATE;
   evt_trans[IN_DELETE] = EventType::DELETE;
 
   unordered_map<int, string> evt_name;
   evt_name[IN_MODIFY] = "modify";
+  evt_name[IN_MOVED_TO] = "move to";
   evt_name[IN_CREATE] = "create";
   evt_name[IN_DELETE] = "delete";
   
@@ -87,7 +89,7 @@ void InotifyWatcher::get_file_path_loop(vector<string> watch_paths) {
         EventType ev_t;
         if (!match(filename_str)) {
           cout << filename_str << " not match tracking pattern\n";
-        } else if (event->mask & IN_CREATE | IN_DELETE | IN_MODIFY) {
+        } else if (event->mask & IN_CREATE | IN_DELETE | IN_MODIFY | IN_MOVED_TO) {
           string full_path = (dir / filename).u8string();
           cout << "detect " << evt_name[event->mask] << " event on: " << full_path << endl;
           Event new_ev(evt_trans[event->mask], full_path);
