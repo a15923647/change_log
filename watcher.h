@@ -14,8 +14,5 @@ class Watcher {
      * mkdir
      */
     virtual void init() = 0;
-  //private:
-    //virtual bool match(std::string& filename) const = 0;
-    
 };
 #endif

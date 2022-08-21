@@ -38,6 +38,7 @@ class VectorStorage : public Storage {
   public:
     static void update(Event);
     static void *query(std::string& query);
+  //unable to pass compilation
   //protected:
     //static std::vector<Node> record;
     //static std::map<std::string, std::map<std::string, File>> watch_struct;

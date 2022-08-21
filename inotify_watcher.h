@@ -8,8 +8,8 @@ class InotifyWatcher : public Watcher {
     InotifyWatcher(Storage* storage_p);
     void start() override;
     void init() override;
-  //private:
-    bool match(std::string& filename);// override;
+  private:
+    bool match(std::string& filename);
     void get_file_path_loop(const std::vector<std::string> watch_paths);
     Storage* storage_p;
 };
