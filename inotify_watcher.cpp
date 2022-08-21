@@ -90,6 +90,7 @@ void InotifyWatcher::get_file_path_loop(vector<string> watch_paths) {
   evt_name[IN_DELETE] = "delete";
   
   puts("starts watching...");
+  cout << "watching " << watching.size() << " paths\n";
   while (1) {
     length = read(fd, buffer, BUF_LEN);
     if (length < 0)

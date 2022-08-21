@@ -1,5 +1,6 @@
 #include "inotify_watcher.h"
 #include "vector_storage.h"
+#include "config.h"
 #include <thread>
 #include <unistd.h>
 #include <iostream>
@@ -27,6 +28,7 @@ void qthread() {
 }
 
 int main(void) {
+  config::load_from_json("config.json");
   VectorStorage *vstorage_p = new VectorStorage();
   thread t(qthread);
   t.detach();
