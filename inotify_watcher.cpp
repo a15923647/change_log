@@ -22,7 +22,6 @@ using namespace std;
 //namespace fs = std::filesystem;
 #define fs std::filesystem
 
-//bool InotifyWatcher::match(std::string& filename) {
 bool InotifyWatcher::match(std::string& filename) {
    regex e(config::re);
    return regex_match(filename, e);
@@ -38,15 +37,12 @@ void InotifyWatcher::start() {
   fs::path temp_dirp(config::temp_dir);
   if (!fs::exists(temp_dirp)) 
     fs::create_directory(temp_dirp);
-  vector<string> watch_paths(1, config::root_dir);
-  get_file_path_loop(watch_paths);
+  //vector<string> watch_paths(1, config::root_dir);
+  //get_file_path_loop(watch_paths);
+  get_file_path_loop(config::root_dirs);
 }
 
-void InotifyWatcher::init() {
-  //const auto copyOptions = fs::copy_options::update_existing;
-  //fs::copy(config::root_dir, config::temp_dir, copyOptions);
-  return;
-}
+void InotifyWatcher::init() {}
 
 static void watch_dir(int fd, fs::path path, unordered_map<int, fs::path>& wd2path, unordered_set<string>& watching) {
   try {

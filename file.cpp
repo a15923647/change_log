@@ -18,3 +18,17 @@ void read_whole_file(std::string& path, std::string& dest) {
   dest = std::string(ss.str());
   fin.close();
 }
+std::string get_root_dir(std::string const& dir, std::vector<std::string> const& candidates) {
+  const size_t len = candidates.size();
+  std::string res;
+  size_t best_match = 0;
+  for(auto& can : candidates) {
+    size_t match = 0, end = std::min(can.size(), len);
+    for (; match < end && dir[match] == can[match]; match++);
+    if (best_match < match) {
+      res = can;
+      best_match = match;
+    }
+  }
+  return res;
+}

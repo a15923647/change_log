@@ -25,7 +25,7 @@ void VectorStorage::update(Event ev) {
       return;
   }
   
-  fs::path temp_dir = File::root_dir_sub(dir, config::root_dir, config::temp_dir);
+  fs::path temp_dir = File::root_dir_sub(dir, get_root_dir(dir, config::root_dirs), config::temp_dir);
   if (!fs::exists(temp_dir)) {
     fs::create_directories(temp_dir);
   }
@@ -35,7 +35,7 @@ void VectorStorage::update(Event ev) {
       watch_struct[dir] = std::map<string, File>();
     }
     if (!watch_struct[dir].count(filename)) {
-      File not_tracked_f(ev.path, config::root_dir, config::temp_dir, content);
+      File not_tracked_f(ev.path, get_root_dir(ev.path, config::root_dirs), config::temp_dir, content);
       watch_struct[dir][filename] = not_tracked_f;
       fs::copy(not_tracked_f.path, not_tracked_f.temp_path, copyOptions);
       return;
@@ -76,7 +76,7 @@ void VectorStorage::update(Event ev) {
       record.push_back(Node(ev, op_list));
       return;
     }
-    watch_struct[dir][filename] = File(ev.path, config::root_dir, config::temp_dir, content);
+    watch_struct[dir][filename] = File(ev.path, get_root_dir(ev.path, config::root_dirs), config::temp_dir, content);
     record.push_back(Node(ev, op_list));
   } else if (ev.ev_type == EventType::DELETE) {
     OperationList op_list;

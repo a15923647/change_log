@@ -9,11 +9,12 @@
 #include <openssl/sha.h>
 #include <filesystem>
 #include <mutex>
-#include <sys/stat.h>//
+#include <sys/stat.h>
 //namespace fs = std::filesystem;
 #define fs std::filesystem
 std::string sha256(const std::string str);
 void read_whole_file(std::string& path, std::string& dest);
+std::string get_root_dir(std::string const& dir, std::vector<std::string> const& candidates);
 struct File {
   static fs::path root_dir_sub(std::string path, std::string root_path, std::string temp_dir) {
     fs::path input_path = fs::path(path);
