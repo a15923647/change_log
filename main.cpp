@@ -4,26 +4,34 @@
 #include <thread>
 #include <unistd.h>
 #include <iostream>
+#include <filesystem>
+
 using namespace std;
 
 void qthread() {
   while (1) {
     puts("querying...");
-      string q("1 day");
-      std::vector<Node> *res = (std::vector<Node> *)VectorStorage::query(q);
-      cout << res->size() << endl;
-      for (Node node : *res) {
-        cout << node << endl;
-      }
-      delete res;
-      time_t now; time(&now);
-      struct tm * timeinfo = localtime (&now);
-      timeinfo->tm_hour = timeinfo->tm_min = timeinfo->tm_sec = 0;
-      timeinfo->tm_mday++;
-      double seconds = difftime(mktime(timeinfo), time(NULL));
-      cout << "sleep " << seconds << " seconds\n";
-      //sleep(seconds);
-      sleep(10);
+
+    time_t now; time(&now);
+    struct tm * timeinfo = localtime (&now);
+    
+    string dump_name = to_string(timeinfo->tm_mon) + "_" + to_string(timeinfo->tm_mday);
+    fs::path dump_path = fs::path(config::temp_dir) / fs::path(dump_name);
+    ofstream fout(dump_path.u8string());
+    string q("1 day");
+    std::vector<Node> *res = (std::vector<Node> *)VectorStorage::query(q);
+    fout << res->size() << endl;
+    for (Node node : *res) {
+      fout << node << endl;
+    }
+    delete res;
+
+    timeinfo->tm_hour = timeinfo->tm_min = timeinfo->tm_sec = 0;
+    timeinfo->tm_mday++;
+    double seconds = difftime(mktime(timeinfo), time(NULL));
+    cout << "sleep " << seconds << " seconds\n";
+    sleep(seconds);
+    //sleep(10);
   }
 }
 
