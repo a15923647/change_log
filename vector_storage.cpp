@@ -27,8 +27,13 @@ void VectorStorage::update(Event ev) {
 
   const auto copyOptions = fs::copy_options::update_existing;
   if (ev.ev_type == EventType::MODIFY) {
-    if (!watch_struct.count(dir))
+    if (!watch_struct.count(dir)) {
       watch_struct[dir] = std::map<string, File>();
+      fs::path temp_dir = File::root_dir_sub(dir, config::root_dir, config::temp_dir);
+      if (!fs::exists(temp_dir)) {
+        fs::create_directories(temp_dir);
+      }
+    }
     if (!watch_struct[dir].count(filename)) {
       File not_tracked_f(ev.path, config::root_dir, config::temp_dir, content);
       watch_struct[dir][filename] = not_tracked_f;
@@ -64,6 +69,10 @@ void VectorStorage::update(Event ev) {
       watch_struct[abspath] = std::map<string, File>();
       record.push_back(Node(ev, op_list));
       return;
+    }
+    fs::path temp_dir = File::root_dir_sub(dir, config::root_dir, config::temp_dir);
+    if (!fs::exists(temp_dir)) {
+      fs::create_directories(temp_dir);
     }
     watch_struct[dir][filename] = File(ev.path, config::root_dir, config::temp_dir, content);
     record.push_back(Node(ev, op_list));

@@ -8,6 +8,7 @@
 #include <typeinfo>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <thread>
 #include <string>
 #include <filesystem>
@@ -42,11 +43,26 @@ void InotifyWatcher::start() {
 }
 
 void InotifyWatcher::init() {
-  const auto copyOptions = fs::copy_options::update_existing;
-  fs::copy(config::root_dir, config::temp_dir, copyOptions);
+  //const auto copyOptions = fs::copy_options::update_existing;
+  //fs::copy(config::root_dir, config::temp_dir, copyOptions);
+  return;
 }
 
-
+static void watch_dir(int fd, fs::path path, unordered_map<int, fs::path>& wd2path, unordered_set<string>& watching) {
+  try {
+    for (auto const& dir_entry : fs::directory_iterator{path}) {
+      if (fs::is_directory(dir_entry.path()) && !watching.count(dir_entry.path().u8string())) {
+        watch_dir(fd, dir_entry.path(), wd2path, watching);
+      }
+    }
+  } catch(std::exception &e) {
+    cout << "exception occoured on listing directory, " << e.what() << endl;
+  }
+  string path_str = path.u8string();
+  watching.insert(path_str);
+  wd2path[inotify_add_watch(fd, path_str.c_str(), IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVED_TO)] = path;
+  cout << "watching " << path_str << endl;
+}
 
 void InotifyWatcher::get_file_path_loop(vector<string> watch_paths) {
   char buffer[BUF_LEN];
@@ -58,9 +74,12 @@ void InotifyWatcher::get_file_path_loop(vector<string> watch_paths) {
   if (fd < 0) {
     perror("inotify_init");
   }
-
+  
+  unordered_set<string> watching;
   for (string path : watch_paths) {
-    wd2path[inotify_add_watch(fd, path.c_str(), IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVED_TO)] = fs::path(path);
+    //watch_dir here!
+    //wd2path[inotify_add_watch(fd, path.c_str(), IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVED_TO)] = fs::path(path);
+    watch_dir(fd, fs::path(path), wd2path, watching);
   }
   unordered_map<int, EventType> evt_trans;
   evt_trans[IN_MODIFY] = EventType::MODIFY;
