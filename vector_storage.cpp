@@ -45,6 +45,12 @@ void VectorStorage::update(Event ev) {
     std::string old_content;
     string temp_path(f->temp_path.u8string());
     read_whole_file(temp_path, old_content);
+    string new_hash = sha256(content);
+    if (new_hash == f->sha256_hexs) {
+      cout << "nothing changed (by hashing)\n";
+      f->processing->unlock();
+      return;
+    }
     //lcs
     LCS lcs(old_content, content);
     string lcs_res;
@@ -60,7 +66,7 @@ void VectorStorage::update(Event ev) {
     //store to container
     record.push_back(Node(ev, lcs.op_list));
     //update file states
-    f->sha256_hexs = sha256(content);
+    f->sha256_hexs = new_hash;
     fs::copy(f->path, f->temp_path, copyOptions);
     f->processing->unlock();
   } else if (ev.ev_type == EventType::CREATE) {
