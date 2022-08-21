@@ -1,0 +1,8 @@
+{
+  "root_dirs": [
+    "/dir1/",
+    "/dir2/"
+  ],
+  "re": ".*\\.(cpp|h|py|js|css|html|go|md)|[mM]akefile]",
+  "temp_dir": "/cache/dir/"
+}
