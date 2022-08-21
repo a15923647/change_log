@@ -104,12 +104,16 @@ void InotifyWatcher::get_file_path_loop(vector<string> watch_paths) {
       if (event->len) {
         fs::path dir = wd2path[event->wd];
         fs::path filename(event->name);
+        fs::path fpath = dir / filename;
         string filename_str(event->name);
         EventType ev_t;
-        if (!match(filename_str)) {
+        if (event->mask & IN_CREATE && fs::is_directory(fpath)) {
+          cout << "tracking new dir " << fpath << endl;
+          watch_dir(fd, fpath, wd2path, watching);
+        } else if (!match(filename_str)) {
           cout << filename_str << " not match tracking pattern\n";
         } else if (event->mask & IN_CREATE | IN_DELETE | IN_MODIFY | IN_MOVED_TO) {
-          string full_path = (dir / filename).u8string();
+          string full_path = fpath.u8string();
           cout << "detect " << evt_name[event->mask] << " event on: " << full_path << endl;
           Event new_ev(evt_trans[event->mask], full_path);
           thread t(VectorStorage::update, new_ev);
