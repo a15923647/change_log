@@ -1,6 +1,6 @@
 target:=runrun
 PP:=g++
-CPPFLAGS:= -g -lcrypto -lpthread -std=c++17
+CPPFLAGS:= -g -lcrypto -lpthread -std=c++17 -I ../include/
 LINKFLAGS:= -lcrypto -lpthread
 source:=$(shell find . -maxdepth 1 -type f -name "*.cpp")
 objs:=$(patsubst %.cpp, %.o, $(source))
