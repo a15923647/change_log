@@ -15,7 +15,7 @@ void qthread() {
     time_t now; time(&now);
     struct tm * timeinfo = localtime (&now);
     
-    string dump_name = to_string(timeinfo->tm_mon) + "_" + to_string(timeinfo->tm_mday);
+    string dump_name = to_string(timeinfo->tm_year) + "_" + (timeinfo->tm_mon+1) + "_" + to_string(timeinfo->tm_mday);
     fs::path dump_path = fs::path(config::temp_dir) / fs::path(dump_name);
     ofstream fout(dump_path.u8string());
     string q("1 day");
