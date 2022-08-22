@@ -37,8 +37,6 @@ void InotifyWatcher::start() {
   fs::path temp_dirp(config::temp_dir);
   if (!fs::exists(temp_dirp)) 
     fs::create_directory(temp_dirp);
-  //vector<string> watch_paths(1, config::root_dir);
-  //get_file_path_loop(watch_paths);
   get_file_path_loop(config::root_dirs);
 }
 
@@ -56,7 +54,7 @@ static void watch_dir(int fd, fs::path path, unordered_map<int, fs::path>& wd2pa
   }
   string path_str = path.u8string();
   watching.insert(path_str);
-  wd2path[inotify_add_watch(fd, path_str.c_str(), IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVED_TO)] = path;
+  wd2path[inotify_add_watch(fd, path_str.c_str(), IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVED_TO | IN_OPEN)] = path;
   cout << "watching " << path_str << endl;
 }
 
@@ -73,20 +71,20 @@ void InotifyWatcher::get_file_path_loop(vector<string> watch_paths) {
   
   unordered_set<string> watching;
   for (string path : watch_paths) {
-    //watch_dir here!
-    //wd2path[inotify_add_watch(fd, path.c_str(), IN_MODIFY | IN_CREATE | IN_DELETE | IN_MOVED_TO)] = fs::path(path);
     watch_dir(fd, fs::path(path), wd2path, watching);
   }
   unordered_map<int, EventType> evt_trans;
   evt_trans[IN_MODIFY] = EventType::MODIFY;
   evt_trans[IN_MOVED_TO] = EventType::MODIFY;
   evt_trans[IN_CREATE] = EventType::CREATE;
+  evt_trans[IN_OPEN] = EventType::CREATE;
   evt_trans[IN_DELETE] = EventType::DELETE;
 
   unordered_map<int, string> evt_name;
   evt_name[IN_MODIFY] = "modify";
   evt_name[IN_MOVED_TO] = "move to";
   evt_name[IN_CREATE] = "create";
+  evt_name[IN_OPEN] = "open";
   evt_name[IN_DELETE] = "delete";
   
   puts("starts watching...");
@@ -109,7 +107,7 @@ void InotifyWatcher::get_file_path_loop(vector<string> watch_paths) {
           watch_dir(fd, fpath, wd2path, watching);
         } else if (!match(filename_str)) {
           cout << filename_str << " not match tracking pattern\n";
-        } else if (event->mask & IN_CREATE | IN_DELETE | IN_MODIFY | IN_MOVED_TO) {
+        } else if (event->mask & IN_CREATE | IN_DELETE | IN_MODIFY | IN_MOVED_TO | IN_OPEN) {
           string full_path = fpath.u8string();
           cout << "detect " << evt_name[event->mask] << " event on: " << full_path << endl;
           Event new_ev(evt_trans[event->mask], full_path);

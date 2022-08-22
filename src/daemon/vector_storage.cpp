@@ -17,6 +17,9 @@ void VectorStorage::update(Event ev) {
   bool isreg = fs::is_regular_file(abspath);
   //only record directory and regular file change
   if (!isdir && !isreg) return;
+  //before reading the file, check if the file is newly open by **user**.
+  //Otherwise, the read_whole_file will infinately trigger the same event.
+  if (ev.ev_type == EventType::CREATE && watch_struct.count(dir) && watch_struct[dir].count(filename)) return;
   string content;
   //utf8 only
   if (isreg) {
@@ -71,13 +74,15 @@ void VectorStorage::update(Event ev) {
     f->processing->unlock();
   } else if (ev.ev_type == EventType::CREATE) {
     OperationList op_list;
-    if(isdir) {
+    if(isdir && !watch_struct.count(abspath)) {
       watch_struct[abspath] = std::map<string, File>();
       record.push_back(Node(ev, op_list));
       return;
     }
-    watch_struct[dir][filename] = File(ev.path, get_root_dir(ev.path, config::root_dirs), config::temp_dir, content);
-    record.push_back(Node(ev, op_list));
+    if (!watch_struct[dir].count(filename)) {
+      watch_struct[dir][filename] = File(ev.path, get_root_dir(ev.path, config::root_dirs), config::temp_dir, content);
+      record.push_back(Node(ev, op_list));
+    }
   } else if (ev.ev_type == EventType::DELETE) {
     OperationList op_list;
     if(isdir) {
