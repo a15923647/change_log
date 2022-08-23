@@ -27,9 +27,9 @@ struct Node : Event {
     input_stream >> ev_num >> node.trigger_time;
     node.ev_type = num2ev_type[ev_num];
     input_stream.get();//eat " "
-    getline(input_stream, node.path);
-    input_stream.get();//eat "\n"
+    getline(input_stream, node.path);//including '\n' at line21
     input_stream >> node.op_list;
+    input_stream.get();//eat endl in line22
     return input_stream;
   }
 };
