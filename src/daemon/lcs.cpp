@@ -1,9 +1,12 @@
 #include "lcs.h"
 #include "operation.h"
+#define common_len (*p)
 LCS::LCS(std::string& s, std::string& t) {
   this->s = std::string(s);
   this->t = std::string(t);
-  common_len = std::vector<std::vector<size_t>>(s.length()+1, std::vector<size_t>(t.length()+1, 0));
+  p = new std::vector<std::vector<size_t>>(s.length()+1, std::vector<size_t>(t.length()+1, 0));
+  //common_len = std::vector<std::vector<size_t>>(s.length()+1, std::vector<size_t>(t.length()+1, 0));
+
   construct_arr();
 }
 size_t LCS::length() {return common_len.back().back();}
@@ -27,6 +30,10 @@ void LCS::lcs(std::string& ret) {
   }
   for (; j > 0; j--) {
     op_list.update(edit_operation{EditOperation::Insert, i, std::string(1, t[j-1])});
+  }
+  if (p) {
+    delete p;
+    p = nullptr;
   }
 }
 std::vector<edit_operation> *LCS::diff_list() {return this->op_list.diff_list();}

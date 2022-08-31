@@ -8,6 +8,8 @@
 std::vector<Node> record;
 std::map<std::string, std::map<std::string, File>> watch_struct;
 
+using namespace std;
+
 void VectorStorage::update(Event ev) {
   puts("updating...");
   fs::path abspath(fs::path(ev.path));

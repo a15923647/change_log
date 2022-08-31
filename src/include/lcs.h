@@ -17,6 +17,7 @@ class LCS {
     std::vector<std::vector<size_t>> common_len;
     std::string s;
     std::string t;
+    std::vector<std::vector<size_t>> *p;
 };
 
 #endif

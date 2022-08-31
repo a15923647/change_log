@@ -16,6 +16,7 @@
 #include "config.h"
 #include "event.h"
 #include "vector_storage.h"
+#include "sqlite_storage.h"
 #define EVENT_SIZE (sizeof(struct inotify_event))
 #define BUF_LEN    (1024 * (EVENT_SIZE + 16))
 using namespace std;
@@ -111,7 +112,7 @@ void InotifyWatcher::get_file_path_loop(vector<string> watch_paths) {
           string full_path = fpath.u8string();
           cout << "detect " << evt_name[event->mask] << " event on: " << full_path << endl;
           Event new_ev(evt_trans[event->mask], full_path);
-          thread t(VectorStorage::update, new_ev);
+          thread t(SQLiteStorage::update, new_ev);
           t.detach();
           //VectorStorage::update(new_ev);
         }
