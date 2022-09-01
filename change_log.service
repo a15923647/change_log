@@ -5,3 +5,6 @@ Description=Auto file tracking system
 Type=simple
 ExecStart=/usr/bin/cl-daemon /etc/change_log/config.json
 Restart=always
+
+[Install]
+WantedBy=
