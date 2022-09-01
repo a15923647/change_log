@@ -1,7 +1,9 @@
 # change log
 A automatic file tracking system
+
 Currently support for inotify-supported platform.
 Use sqlite database to store all changes.
+
 # compile
 ```shell=
 ./compile.sh
