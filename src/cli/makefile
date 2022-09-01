@@ -1,5 +1,6 @@
 target:=runrun
 PP:=g++
+cc:=gcc
 CPPFLAGS:= -g -std=c++17 -I ../include/
 LINKFLAGS:= -lcrypto -lpthread -ldl
 source:=$(shell find . -maxdepth 1 -type f -name "*.cpp")
@@ -14,7 +15,7 @@ all: $(target)
 runrun: $(objs) sqlite3.o
 	$(PP) -o $@ $^ $(LINKFLAGS)
 
-sqlite : sqlite3.c
+sqlite3 : sqlite3.c
 	$(cc) -g -o sqlite3.c -o sqlite3.o -lpthread -ldl
 
 %.o: %.cpp
