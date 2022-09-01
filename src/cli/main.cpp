@@ -104,29 +104,37 @@ void back(string db_loc, regex& pat, time_t til) {
     }
     cout << "recover " + k + " to version back to " << last.trigger_time << endl;
     cout << cur_content;
+    //currently just list them
     //DO SOMETHING HERE!
   }
 }
 
-int main(int argc, char *argv[]) {
+void print_usage(const char *argv[]) {
+  cerr << argv[0] << " db_path command [path_pattern]\n";
+  cerr << "supported command:\nll\nlist\nback\n";
+}
+
+int main(int argc, const char *argv[]) {
   if (argc < 3) {
-    cerr << argv[0] << " command db_path [path_pattern]\n";
-    cerr << "command:\nll\nlist\nback\n";
+    print_usage(argv);
     exit(1);
   }
-  string db_loc(argv[2]);
+  string db_loc(argv[1]);
   regex pat(".*");
   if (argc > 3)
     pat = regex(argv[3]);
-  if (strcmp(argv[1], "back") == 0) {
+  if (strcmp(argv[2], "back") == 0) {
     time_t til = 0;
     if (argc > 4)
       til = stoi(argv[4]);
     back(db_loc, pat, til);
-  } else if (strcmp(argv[1], "list") == 0) {
+  } else if (strcmp(argv[2], "list") == 0) {
     list(db_loc, pat);
-  } else if (strcmp(argv[1], "ll") == 0) {
+  } else if (strcmp(argv[2], "ll") == 0) {
     ll(db_loc, pat);
+  } else {
+    print_usage(argv);
+    exit(1);
   }
   return 0;
 }
