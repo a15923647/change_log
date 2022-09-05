@@ -1,6 +1,5 @@
 #include "sqlite_storage.h"
 using namespace std;
-std::string db_loc;
 sqlite3 *db;
 mutex *db_mutex = nullptr;
 mutex *tx_mutex = nullptr;
@@ -14,10 +13,10 @@ const std::vector<std::string> table_names = {
 const std::vector<std::string> SQLiteStorage::create_table_queries = {
   "CREATE TABLE file_meta (\
     hash             char(64),\
-    path             TEXT KEY\
+    path             TEXT PRIMARY KEY\
     );",
   "CREATE TABLE file_content (\
-    path             TEXT KEY,\
+    path             TEXT PRIMARY KEY,\
     content          TEXT\
     );",
   "CREATE TABLE history_meta (\
@@ -34,25 +33,28 @@ const std::vector<std::string> SQLiteStorage::create_table_queries = {
     );"
 };
 
-bool send_query(string& sql, void (*handler)(sqlite3_stmt* stmt, void *ret_struct), void *result_struct) {
+bool send_query(string& sql, void (*handler)(sqlite3_stmt* stmt, void *ret_struct), void *result_struct, bool silent=false) {
   db_mutex->lock();
-  int rc = sqlite3_open_v2(db_loc.c_str(), &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_SHAREDCACHE, NULL);
+  int rc = sqlite3_open_v2(config::db_path.c_str(), &db, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE | SQLITE_OPEN_NOMUTEX | SQLITE_OPEN_SHAREDCACHE, NULL);
   if (rc) {
-    cerr << "fail to open sqlite db at " << db_loc << endl;
+    cerr << "fail to open sqlite db at " << config::db_path << endl;
     exit(1);
   }
-  cout << "open db sucessfully\n";
+  if (!silent)
+    cout << "open db sucessfully\n";
 
   sqlite3_busy_timeout(db, 10000);
 
   sqlite3_stmt *stmt = NULL;
-  cout << "send query: " << sql << endl;
+  if (!silent)
+    cout << "send query: " << sql << endl;
   int chk = sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, NULL);
   if (chk != SQLITE_OK) {
     cerr << "encounter error on executing sql statement below\n" + sql << endl << sqlite3_errmsg(db) << endl;
     exit(2);
   }
-  cout << "run sql: " << sql << " sucessfully!\n";
+  if (!silent)
+    cout << "run sql: " << sql << " sucessfully!\n";
   bool ret = false;
 
   rc = sqlite3_step(stmt);
@@ -84,23 +86,33 @@ bool file_in_db(string& abss) {
 
 bool table_exist(string table_name) {
   string sql = "SELECT name FROM sqlite_master WHERE type = 'table' AND name = '" + table_name + "';";
-  return send_query(sql, nop, NULL);
+  return send_query(sql, nop, NULL, true);
 }
+//config must be loaded
+SQLiteStorage::SQLiteStorage() : SQLiteStorage(config::db_path) {}
 
-SQLiteStorage::SQLiteStorage(string& db_path) {
-  db_loc = db_path;
-  if (!db_mutex) {
-    db_mutex = new mutex();
-  }
-  if (!tx_mutex) {
-    tx_mutex = new mutex();
-  }
+static void create_tables_ifnexist(const vector<string>& create_table_queries, const vector<string>& table_names) {
   for (size_t i = 0; i < create_table_queries.size(); i++) {
     string table_name = table_names[i];
     string sql = create_table_queries[i];
     if (!table_exist(table_name))
       send_query(sql, nop, NULL);
   }
+}
+
+SQLiteStorage::SQLiteStorage(string& db_path) {
+  if (db_path.empty()) { //imply that config is not loaded
+    cerr << "db path is empty\n";
+    exit(4);
+  }
+  config::db_path = db_path;
+  if (!db_mutex) {
+    db_mutex = new mutex();
+  }
+  if (!tx_mutex) {
+    tx_mutex = new mutex();
+  }
+  create_tables_ifnexist(create_table_queries, table_names);
 }
 
 string double_single_quote(string& original) {
@@ -169,6 +181,7 @@ static inline void db_modify_file(string& abss, Event& ev) {
 }
 
 void SQLiteStorage::update(Event ev) {
+  create_tables_ifnexist(create_table_queries, table_names);
   fs::path abspath(fs::path(ev.path));
   string abss = abspath.u8string();
   bool isdir = fs::is_directory(abspath);

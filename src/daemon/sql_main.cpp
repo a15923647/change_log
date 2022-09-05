@@ -35,10 +35,13 @@ int main(int argc, const char* argv[]) {
     exit(1);
   }
   string config_path(argv[1]);
+  cout << "init config from " + config_path << endl;
   config::load_from_json(config_path);
-  SQLiteStorage *sql_st_p = new SQLiteStorage(config::db_path);
+  //SQLiteStorage *sql_st_p = new SQLiteStorage(config::db_path);
+  SQLiteStorage *sql_st_p = new SQLiteStorage();//just ensure config is loaded
   thread t(qthread);
   t.detach();
-  InotifyWatcher watchd(sql_st_p);
+  //InotifyWatcher watchd(config_path);
+  InotifyWatcher watchd;//config must be loaded first
   watchd.start();
 }

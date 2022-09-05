@@ -12,7 +12,7 @@
 #include "storage.h"
 #include "lcs.h"
 #include "file.h"
-extern std::string db_loc;
+#include "config.h"
 extern sqlite3* db;
 /*
  * sqlite will complain use too many memory if we have multiple query at the same time.
@@ -21,6 +21,7 @@ extern std::mutex *db_mutex;
 class SQLiteStorage : public Storage {
   public:
     SQLiteStorage(std::string& db_path);
+    SQLiteStorage();
     static void update(Event);
     static void *query(std::string& query);
   private:
